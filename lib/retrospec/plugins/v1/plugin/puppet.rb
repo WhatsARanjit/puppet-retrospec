@@ -1,5 +1,6 @@
 require 'retrospec/plugins/v1/module_helpers'
 require 'retrospec/plugins/v1'
+require 'retrospec/config'
 require_relative 'spec_object'
 require 'erb'
 require_relative 'template_helpers'
@@ -24,6 +25,9 @@ module Retrospec
           super
           @manifest_dir = File.join(supplied_module_path,'manifests')
           Utilities::PuppetModule.instance.future_parser = config_data[:enable_future_parser]
+        end
+
+        def post_init
           # user supplied a template path or user wants to use local templates
           @template_dir = setup_user_template_dir(config_data[:template_dir], config_data[:scm_url], config_data[:ref])
           # before we validate the module directory we should ensure the module exists by creating it
@@ -35,22 +39,31 @@ module Retrospec
           @context = ::Puppet::SpecObject.new(module_path, Utilities::PuppetModule.instance, config_data)
         end
 
-        # used to display subcommand options to the cli
+        # used to display subcommand options to tglobal_confighe cli
         # the global options are passed in for your usage
         # http://trollop.rubyforge.org
         # all options here are available in the config passed into the initialize code
-        def self.cli_options(global_opts)
-          template_dir = global_opts['plugins::puppet::template_dir'] || File.expand_path('~/.retrospec/repos/retrospec-puppet-templates')
-          scm_url = ENV['RETROSPEC_PUPPET_SCM_URL'] || global_opts['plugins::puppet::templates::url']
-          scm_branch = ENV['RETROSPEC_PUPPET_SCM_BRANCH'] || global_opts['plugins::puppet::templates::ref'] || 'master'
-          future_parser = global_opts['plugins::puppet::enable_future_parser']
-          beaker_tests  = global_opts['plugins::puppet::enable_beaker_tests']
-          namespace     = global_opts['plugins::puppet::namespace'] || 'namespace'
-          create        = global_opts['plugins::puppet::auto_create'] || false
-          Trollop::options do
+        # this is the only entry point into the plugin
+        def self.run_cli(global_opts, global_config, plugin_config)
+          template_dir = plugin_config['plugins::puppet::template_dir'] || File.expand_path('~/.retrospec/repos/retrospec-puppet-templates')
+          scm_url = ENV['RETROSPEC_PUPPET_SCM_URL'] || plugin_config['plugins::puppet::templates::url']
+          scm_branch = ENV['RETROSPEC_PUPPET_SCM_BRANCH'] || plugin_config['plugins::puppet::templates::ref'] || 'master'
+          future_parser = plugin_config['plugins::puppet::enable_future_parser'] || false
+          beaker_tests  = plugin_config['plugins::puppet::enable_beaker_tests'] || false
+          namespace     = plugin_config['plugins::puppet::namespace'] || 'namespace'
+          create        = plugin_config['plugins::puppet::auto_create'] || false
+          # a list of subcommands for this plugin
+          sub_commands  = []
+          if sub_commands.count > 0
+            sub_command_help = "Subcommands:\n#{sub_commands.join("\n")}\n"
+          else
+            sub_command_help = ""
+          end
+          plugin_opts = Trollop::options do
             version "#{Retrospec::Puppet::VERSION} (c) Corey Osman"
             banner <<-EOS
-Generates puppet rspec test code based on the classes and defines inside the manifests directory.
+Generates puppet rspec test code based on the classes and defines inside the manifests directory.\n
+#{sub_command_help}
 
             EOS
             opt :template_dir, "Path to templates directory (only for overriding Retrospec templates)", :type => :string,
@@ -67,6 +80,21 @@ Generates puppet rspec test code based on the classes and defines inside the man
                 :type => :string
             opt :enable_beaker_tests, "Enable the creation of beaker tests", :require => false, :type => :boolean, :default => beaker_tests
             opt :enable_future_parser, "Enables the future parser only during validation", :default => future_parser, :require => false, :type => :boolean
+            stop_on sub_commands
+          end
+          # the passed in options will always override the config file
+          plugin_data = plugin_opts.merge(global_config).merge(global_opts).merge(plugin_opts)
+          # define the default action to use the plugin here, the default is run
+          sub_command = (ARGV.shift || :run).to_sym
+          # create an instance of this plugin
+          plugin = self.new(plugin_data[:module_path],plugin_data)
+          # check if the plugin supports the sub command
+          if plugin.respond_to?(sub_command)
+            plugin.post_init   # finish initialization
+            plugin.send(sub_command)
+          else
+            puts "The subcommand #{sub_command} is not supported or valid"
+            exit 1
           end
         end
 

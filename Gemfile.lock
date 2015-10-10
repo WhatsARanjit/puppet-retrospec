@@ -81,7 +81,7 @@ GEM
     rake (10.4.2)
     rdoc (3.12.2)
       json (~> 1.4)
-    retrospec (0.3.0)
+    retrospec (0.4.0)
       trollop
     rspec (3.3.0)
       rspec-core (~> 3.3.0)
@@ -115,7 +115,7 @@ DEPENDENCIES
   pry-stack_explorer
   puppet (= 3.7.3)!
   rdoc (~> 3.12)
-  retrospec (~> 0.3)
+  retrospec (~> 0.4)
   rspec (~> 3.2)
   trollop
   yard (~> 0.7)

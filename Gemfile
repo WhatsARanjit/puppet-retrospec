@@ -6,7 +6,7 @@ source "http://rubygems.org"
 #gem 'hiera', '~> 1.0'
 
 gem 'trollop'
-gem 'retrospec', "~> 0.3"
+gem 'retrospec', "~> 0.4"
 # Include everything needed to run rake, tests, features, etc.
 group :development do
   gem "rspec", "~> 3.2"

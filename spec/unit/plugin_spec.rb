@@ -10,12 +10,4 @@ describe "puppet" do
     expect(Retrospec::Puppet::VERSION).to eq('0.9.1')
   end
 
-  it 'can get cli options' do
-    expect(Retrospec::Plugins::V1::Puppet.cli_options({:module_path => '/tmp/testplugin_dir'})[:enable_future_parser]).to be false
-  end
-
-
-  it 'can get cli options' do
-    expect(Retrospec::Plugins::V1::Puppet.cli_options({:module_path => '/tmp/testplugin_dir', 'plugins::puppet::enable_future_parser' => true})[:enable_future_parser]).to be true
-  end
 end
