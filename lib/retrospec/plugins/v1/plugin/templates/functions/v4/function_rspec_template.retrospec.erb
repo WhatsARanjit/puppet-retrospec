@@ -1,0 +1,44 @@
+require 'spec_helper'
+
+describe '<%= name %>' do
+  let(:scope) { PuppetlabsSpec::PuppetInternals.scope }
+
+  let(:function_args) do
+    []
+  end
+  
+  let(:function) do
+     scope.function_<%= name %>(function_args)
+  end
+
+  let(:return_value) do
+
+  end
+
+  describe 'validate arity' do
+    let(:function_args) do
+       
+    end
+
+  end
+  
+  it "should exist" do
+    Puppet::Parser::Functions.function(subject).should == "function_#{subject}"
+  end
+
+  # help enforce good function defination
+  it 'should contain arity' do
+     
+  end
+  it "should raise a ParseError if there is less than 1 arguments" do
+    lambda { function }.should( raise_error(Puppet::ParseError))
+  end
+
+  it 'should return data' do
+    scope.function_<%= name %>(function_args).should eq(return_value)
+  end
+
+  def epp_function()
+    epp_func = scope.compiler.loaders.public_environment_loader.load(:function, 'inline_epp')
+  end
+end

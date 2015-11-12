@@ -7,6 +7,10 @@ def fixture_modules_path
   @fixture_module_path ||= File.expand_path(File.join(fixtures_path, 'modules'))
 end
 
+def sample_module_path
+   File.join(fixtures_path, 'fixture_modules', 'sample_module')
+end
+
 def fixtures_path
   @fixtures_path ||= File.expand_path(File.join(File.dirname(__FILE__), 'fixtures'))
 end
@@ -21,6 +25,10 @@ end
 
 def fixtures_provider_path
   @fixtures_provider_path ||= File.expand_path(File.join(fixtures_path, 'providers'))
+end
+
+def fixtures_functions_path
+  @fixtures_functions_path ||= File.expand_path(File.join(fixtures_path, 'functions'))
 end
 
 def clean_up_spec_dir(dir)
